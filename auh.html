@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+
+    <div class="home-container">
+        <h2>Welcome to the Home Page</h2>
+        
+        <!-- Show Users Section -->
+        <button id="showUserButton" class="form-button">Show Users</button>
+        <button id="hideUserButton" class="form-button" style="display: none;">Hide Users</button>
+        <div id="usersList"></div>
+        
+        <!-- Edit User Form -->
+        <div id="editUserForm" style="display: none;">
+            <h3>Edit User</h3>
+            <form id="editForm">
+                <input type="text" id="editUsername" placeholder="New Username" required>
+                <input type="password" id="editPassword" placeholder="New Password">
+                <button type="submit" class="form-button">Update User</button>
+            </form>
+        </div>
+
+        <button id="logoutButton" class="form-button">Logout</button>
+    </div>
+
+    <script>
+        // Function to get the authentication token from cookies
+        function getAuthToken() {
+            const name = 'authToken=';
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return '';
+        }
+
+        // Function to check if the user is authenticated
+        function isAuthenticated() {
+            const token = getAuthToken();
+            return token !== ''; // Token exists, user is authenticated
+        }
+
+        // If the user is not authenticated, redirect to login page
+        if (!isAuthenticated()) {
+            window.location.href = 'auh.html'; // Redirect to login page
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const showUserButton = document.getElementById("showUserButton");
+            const hideUserButton = document.getElementById("hideUserButton");
+            const usersListDiv = document.getElementById("usersList");
+            const logoutButton = document.getElementById("logoutButton");
+            const editUserForm = document.getElementById("editUserForm");
+            const editForm = document.getElementById("editForm");
+            let currentUserId = null;
+            let currentToken = ''; // Variable to store the new token
+
+            // Function to fetch users from the database and get a new token for updates
+            async function fetchUsers() {
+                const token = getAuthToken();
+                if (token) {
+                    try {
+                        const response = await fetch('user/display', { // Using your '/user/display' backend endpoint
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                            },
+                        });
+
+                        const result = await response.json();
+                        if (response.ok) {
+                            if (result.data && result.data.length > 0) {
+                                currentToken = result.token; // Store the new token
+
+                                // Display list of users
+                                usersListDiv.innerHTML = `<h3>Users List:</h3><ul>`;
+                                result.data.forEach(user => {
+                                    usersListDiv.innerHTML += `
+                                        <li>
+                                            Username: ${user.username} 
+                                            <button class="editButton" data-id="${user.userid}">Edit</button>
+                                        </li>
+                                    `;
+                                });
+                                usersListDiv.innerHTML += `</ul>`;
+                            } else {
+                                usersListDiv.innerHTML = `<p>No users found.</p>`;
+                            }
+                        } else {
+                            usersListDiv.innerHTML = `<p class="error-message">Error: ${result.data.title}</p>`;
+                        }
+                    } catch (error) {
+                        usersListDiv.innerHTML = `<p class="error-message">Network error: ${error.message}</p>`;
+                    }
+                } else {
+                    usersListDiv.innerHTML = `<p class="error-message">No authentication token found. Please log in again.</p>`;
+                }
+            }
+
+            // Show users list when the button is clicked
+            showUserButton.addEventListener("click", () => {
+                fetchUsers();
+                showUserButton.style.display = 'none';
+                hideUserButton.style.display = 'inline-block';
+            });
+
+            // Hide the users list when the "Hide Users" button is clicked
+            hideUserButton.addEventListener("click", () => {
+                usersListDiv.innerHTML = '';  // Clear the user list
+                showUserButton.style.display = 'inline-block';
+                hideUserButton.style.display = 'none';
+            });
+
+            // Handle editing a user
+            usersListDiv.addEventListener("click", (event) => {
+                if (event.target && event.target.classList.contains("editButton")) {
+                    currentUserId = event.target.getAttribute("data-id");
+                    const userItem = event.target.parentElement;
+                    const username = userItem.textContent.replace("Edit", "").trim(); // Extract username
+
+                    document.getElementById("editUsername").value = username;
+                    document.getElementById("editPassword").value = ""; // Reset the password field
+                    editUserForm.style.display = 'block';
+                }
+            });
+
+            // Handle the update form submission
+            editForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const token = currentToken; // Use the new token generated during the fetchUsers call
+                const username = document.getElementById("editUsername").value;
+                const password = document.getElementById("editPassword").value;
+
+                const data = {
+                    username,
+                    password
+                };
+
+                try {
+                    const response = await fetch(`user/update`, { // PUT endpoint for updating user
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userId: currentUserId, // Send the user ID for updating the correct user
+                            username: username,
+                            password: password,
+                        }),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // Hide the edit form and refresh the user list
+                        editUserForm.style.display = 'none';
+                        fetchUsers(); // Refresh the user list after successful update
+                    } else {
+                        alert('Error updating user: ' + result.data.title);
+                    }
+                } catch (error) {
+                    alert('Network error: ' + error.message);
+                }
+            });
+
+            // Logout functionality
+            logoutButton.addEventListener("click", () => {
+                document.cookie = "authToken=; expires=Thu, 01 Jan 2050 00:00:00 UTC; path=/"; // Delete the auth token
+                window.location.href = 'auh.html'; // Redirect to login page
+            });
+        });
+    </script>
+
+</body>
+</html>
