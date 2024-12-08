@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+
+    <h2>Welcome to the Home Page</h2>
+
+    <!-- Show Users Section -->
+    <button id="showUserButton">Show Users</button>
+    <button id="hideUserButton" style="display: none;">Hide Users</button>
+    <div id="usersList"></div>
+
+    <!-- Edit User Form -->
+    <div id="editUserForm" style="display: none;">
+        <h3>Edit User</h3>
+        <form id="editForm">
+            <input type="text" id="editUsername" placeholder="New Username" required>
+            <input type="password" id="editPassword" placeholder="New Password">
+            <button type="submit">Update User</button>
+        </form>
+    </div>
+
+    <button id="logoutButton">Logout</button>
+
+    <script>
+        // Function to get the authentication token from cookies
+        function getAuthToken() {
+            const name = 'authToken=';
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) === 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return '';
+        }
+
+        // Function to check if the user is authenticated
+        function isAuthenticated() {
+            const token = getAuthToken();
+            return token !== ''; // Token exists, user is authenticated
+        }
+
+        // If the user is not authenticated, redirect to login page
+        if (!isAuthenticated()) {
+            window.location.href = 'auh.html'; // Redirect to login page
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const showUserButton = document.getElementById("showUserButton");
+            const hideUserButton = document.getElementById("hideUserButton");
+            const usersListDiv = document.getElementById("usersList");
+            const logoutButton = document.getElementById("logoutButton");
+            const editUserForm = document.getElementById("editUserForm");
+            const editForm = document.getElementById("editForm");
+            let currentUserId = null;
+            let currentToken = ''; // Variable to store the new token
+
+            // Function to fetch users from the database
+            async function fetchUsers() {
+                const token = getAuthToken();
+                if (token) {
+                    try {
+                        const response = await fetch('user/display', {
+                            method: 'GET',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                        });
+
+                        const result = await response.json();
+                        if (response.ok) {
+                            if (result.data && result.data.length > 0) {
+                                currentToken = result.token; // Store the new token
+
+                                // Display list of users
+                                usersListDiv.innerHTML = '';
+                                result.data.forEach(user => {
+                                    const userItem = document.createElement('div');
+                                    userItem.innerHTML = `Username: ${user.username}`;
+                                    const editButton = document.createElement('button');
+                                    editButton.textContent = 'Edit';
+                                    editButton.setAttribute('data-id', user.userid);
+                                    editButton.addEventListener('click', () => {
+                                        currentUserId = user.userid;
+                                        document.getElementById("editUsername").value = user.username;
+                                        document.getElementById("editPassword").value = '';
+                                        editUserForm.style.display = 'block';
+                                    });
+                                    userItem.appendChild(editButton);
+                                    usersListDiv.appendChild(userItem);
+                                });
+                            } else {
+                                usersListDiv.textContent = 'No users found.';
+                            }
+                        } else {
+                            usersListDiv.textContent = 'Error fetching users.';
+                        }
+                    } catch (error) {
+                        usersListDiv.textContent = 'Network error.';
+                    }
+                } else {
+                    usersListDiv.textContent = 'No authentication token found.';
+                }
+            }
+
+            // Show users list
+            showUserButton.addEventListener("click", () => {
+                fetchUsers();
+                showUserButton.style.display = 'none';
+                hideUserButton.style.display = 'inline-block';
+            });
+
+            // Hide the users list
+            hideUserButton.addEventListener("click", () => {
+                usersListDiv.innerHTML = '';
+                showUserButton.style.display = 'inline-block';
+                hideUserButton.style.display = 'none';
+            });
+
+            // Handle the update form submission
+            editForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const token = currentToken;
+                const username = document.getElementById("editUsername").value;
+                const password = document.getElementById("editPassword").value;
+
+                try {
+                    const response = await fetch(`user/update`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            userId: currentUserId,
+                            username: username,
+                            password: password,
+                        }),
+                    });
+
+                    if (response.ok) {
+                        editUserForm.style.display = 'none';
+                        fetchUsers(); // Refresh the user list
+                    } else {
+                        alert('Error updating user.');
+                    }
+                } catch (error) {
+                    alert('Network error.');
+                }
+            });
+
+            // Logout functionality
+            logoutButton.addEventListener("click", () => {
+                document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+                window.location.href = 'auh.html';
+            });
+        });
+    </script>
+
+</body>
+</html>

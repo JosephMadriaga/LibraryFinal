@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Account</title>
+    <script src="manage.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <h1>Library Management</h1>
+        <nav>
+            <ul>
+                <li><a href="author.html">Authors</a></li>
+                <li><a href="books.html">Books</a></li>
+                <li><a href="author-books.html">Author-Books</a></li>
+            </ul>
+        </nav>
+        <div>
+            <div id="loggedIn" style="display: none;">
+                <a href="manage.html">Manage Account</a>
+                <a href="logout.html">Logout</a>
+            </div>
+            <div id="loggedOut">
+                <a href="authentication.html">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="manageFormContainer" style="display: none;">
+            <h2>Update Credentials</h2>
+            <form id="update-user-form">
+                <div>
+                    <label for="new-username">New Username (optional)</label>
+                    <input type="text" id="new-username">
+                </div>
+                <div>
+                    <label for="repeat-username">Repeat Username (optional)</label>
+                    <input type="text" id="repeat-username">
+                </div>
+                <div>
+                    <label for="new-password">New Password *</label>
+                    <input type="password" id="new-password" required>
+                </div>
+                <div>
+                    <label for="repeat-password">Repeat Password *</label>
+                    <input type="password" id="repeat-password" required>
+                </div>
+                <button type="submit">Submit</button>
+                <button type="button" id="deleteAccountBtn">Delete Account</button>
+                <button type="button" onclick="document.getElementById('manageFormContainer').style.display = 'none';">Cancel</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Users List</h2>
+            <button id="manage-account-btn" type="button">Manage Account</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody id="users-list">
+                    <!-- Users will be listed here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            const authToken = getCookie('authToken');
+            const loggedInMenu = document.getElementById('loggedIn');
+            const loggedOutMenu = document.getElementById('loggedOut');
+
+            if (authToken) {
+                loggedInMenu.style.display = 'block';
+                loggedOutMenu.style.display = 'none';
+            } else {
+                loggedInMenu.style.display = 'none';
+                loggedOutMenu.style.display = 'block';
+            }
+
+            const logoutButton = document.querySelector('#loggedIn a[href="logout.html"]');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.cookie = 'authToken=; Max-Age=-99999999; path=/';
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const authToken = getCookie('authToken');
+            if (!authToken) {
+                window.location.href = 'authentication.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

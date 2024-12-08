@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management - Sign In</title>
+    <script src="authentication.js" defer></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav>
+        <a href="http://127.0.0.1/library/public/index.html">Library Management</a>
+    </nav>
+
+    <!-- Login Form -->
+    <div>
+        <h4>HELLO!</h4>
+        <p>Log into your account</p>
+        <form id="signInForm" novalidate>
+            <div>
+                <label for="signInUsername">Username</label>
+                <input type="text" id="signInUsername" name="username" required>
+                <div>Please enter your username.</div>
+            </div>
+            <div>
+                <label for="signInPassword">Password</label>
+                <input type="password" id="signInPassword" name="password" required>
+                <div>Please enter your password.</div>
+            </div>
+            <button id="sign-in-user" type="submit">Sign In</button>
+        </form>
+        <div>
+            <p>Don't have an account? <a href="http://127.0.0.1/library/public/regi.html">Register</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

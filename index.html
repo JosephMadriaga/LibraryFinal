@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management</title>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav>
+        <a href="/library/public/index.html">Library Management</a>
+        <button id="toggleMenu">Menu</button>
+        <div id="navbarContent">
+            <a href="author.html">Authors</a>
+            <a href="books.html">Books</a>
+            <a href="author-books.html">Author-Books</a>
+        </div>
+        <div id="accountManagement">
+            <div id="loggedIn" style="display: none;">
+                <a href="manage.html">Manage Account</a>
+                <a id="logoutButton" href="#">Logout</a>
+            </div>
+            <div id="loggedOut">
+                <a href="/library/public/authentication.html">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Section -->
+    <main>
+        <h1>Welcome to Library Management</h1>
+        <p>Your one-stop solution to manage authors, books, and more!</p>
+    </main>
+
+    <!-- JavaScript Section -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get a cookie by name
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            const loggedInMenu = document.getElementById('loggedIn');
+            const loggedOutMenu = document.getElementById('loggedOut');
+
+            const authToken = getCookie('authToken');
+
+            if (authToken) {
+                loggedInMenu.style.display = 'block';
+                loggedOutMenu.style.display = 'none';
+            } else {
+                loggedInMenu.style.display = 'none';
+                loggedOutMenu.style.display = 'block';
+            }
+
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.cookie = 'authToken=; Max-Age=-99999999; path=/';
+                    window.location.href = '/library-ui/index.html';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

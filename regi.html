@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management - Register</title>
+    <script src="regi.js" defer></script>
+</head>
+
+<body>
+    <!-- Register Form -->
+    <div>
+        <h4>REGISTER</h4>
+        <p>Create an Account</p>
+        <form id="registerForm" novalidate>
+            <div>
+                <label for="registerUsername">Username</label>
+                <input type="text" id="registerUsername" name="username" required>
+                <div class="invalid-feedback">Please enter a username.</div>
+            </div>
+            <div>
+                <label for="registerPassword">Password</label>
+                <input type="password" id="registerPassword" name="password" required>
+                <div class="invalid-feedback">Please enter your password.</div>
+            </div>
+            <button id="register-user" type="submit">Register</button>
+        </form>
+        <div>
+            <p>Already have an account? <a href="http://127.0.0.1/library/public/authentication.html">Sign In</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

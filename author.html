@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authors | Library Management</title>
+    <script src="author.js" defer></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav>
+        <a href="http://127.0.0.1/library/public/index.html">Library Management</a>
+        <ul>
+            <li><a href="author.html">Authors</a></li>
+            <li><a href="books.html">Books</a></li>
+            <li><a href="author-books.html">Author-Books</a></li>
+        </ul>
+        <div id="loggedIn" style="display: none;">
+            <a href="manage.html">Manage Account</a>
+            <a href="logout.html">Logout</a>
+        </div>
+        <div id="loggedOut">
+            <a href="http://127.0.0.1/library/public/authentication.html">Login</a>
+        </div>
+    </nav>
+
+    <!-- Update Author Form -->
+    <div id="updateFormContainer" style="display: none;">
+        <form id="update-author-form">
+            <label for="update-author-name">Edit Author</label>
+            <input type="text" id="update-author-name" required>
+            <button type="submit">Save Changes</button>
+            <button type="button" onclick="document.getElementById('updateFormContainer').style.display = 'none';">Cancel</button>
+        </form>
+    </div>
+
+    <!-- Add Author Form -->
+    <div id="addFormContainer" style="display: none;">
+        <form id="add-author-form">
+            <label for="author-name">Add Author</label>
+            <input type="text" id="author-name" required>
+            <button type="submit">Add</button>
+            <button type="button" onclick="document.getElementById('addFormContainer').style.display = 'none';">Cancel</button>
+        </form>
+    </div>
+
+    <!-- Manage Authors Table -->
+    <div>
+        <h3>Manage Authors</h3>
+        <button id="add-author-btn">Add Author</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="authors-list">
+                <!-- authors here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Your JavaScript functionality remains here.
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+
+<body>
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Login</button>
+    </form>
+    <div id="output"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginForm = document.getElementById("loginForm");
+            const outputDiv = document.getElementById("output");
+
+            function setCookie(name, value, seconds) {
+                const date = new Date();
+                date.setTime(date.getTime() + (seconds * 1000));
+                document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+            }
+
+            function getAuthToken() {
+                const name = 'authToken=';
+                const decodedCookie = decodeURIComponent(document.cookie);
+                const cookies = decodedCookie.split(';');
+                for (const cookie of cookies) {
+                    let c = cookie.trim();
+                    if (c.startsWith(name)) {
+                        return c.substring(name.length);
+                    }
+                }
+                return '';
+            }
+
+            function isAuthenticated() {
+                return getAuthToken() !== '';
+            }
+
+            if (isAuthenticated()) {
+                window.location.href = 'auh.html';
+            }
+
+            loginForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const formData = new FormData(loginForm);
+                const data = {
+                    username: formData.get("username"),
+                    password: formData.get("password"),
+                };
+
+                try {
+                    const response = await fetch("user/authenticate", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.status === "success") {
+                        setCookie('authToken', result.token, 3600);
+                        outputDiv.textContent = `Login successful! Welcome back, ${data.username}!`;
+
+                        setTimeout(() => {
+                            window.location.href = 'auh.html';
+                        }, 1000);
+                    } else {
+                        outputDiv.textContent = `Error: ${result.message || "Incorrect credentials. Please try again."}`;
+                    }
+                } catch (error) {
+                    outputDiv.textContent = `Network error: ${error.message}`;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
